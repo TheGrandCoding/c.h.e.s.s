@@ -1,10 +1,17 @@
 ﻿Imports System.ComponentModel
 'Imports Newtonsoft.Json
 Imports System.IO
+Imports MASTERLIST = MasterlistDLL.MasterListClient
 
 Public Class Form1
-    Private TestButtons As New List(Of TestButton)
+    Public Shared TestButtons As New List(Of TestButton)
     Private CoordToPlace As New Dictionary(Of Integer, String) From {{1, "A"}, {2, "B"}, {3, "C"}, {4, "D"}, {5, "E"}, {6, "F"}, {7, "G"}, {8, "H"}}
+    Public Shared instance As Form1
+
+    Private Shared Discord As HandleDiscord
+
+    Public Shared InGame As Boolean = False
+    Public Shared Client As Connection
 
     Private WithEvents kbHook As New KeyboardHook()
 
@@ -12,7 +19,6 @@ Public Class Form1
     Dim ctrlPressed As Boolean = False
 
     Private Sub kbHook_KeyDown(ByVal key As Keys) Handles kbHook.KeyDown
-        Me.Text = $"{ctrlPressed} {pPressed} " + key.ToString()
         If key <> Keys.P AndAlso key.ToString().Contains("Control") = False Then
             ctrlPressed = False
             pPressed = False
@@ -42,25 +48,27 @@ Public Class Form1
         Fully
     End Enum
 
-    Private PlayingFor As String = "W_" 'who's turn it is
+    Public Shared WeArePlayingFor As String = ""
+
+    Public Shared CurrentGo As String = "W_" 'who's turn it is
     Private ReadOnly Property Opponent As String
         Get
-            If PlayingFor = "W_" Then Return "B_"
+            If CurrentGo = "W_" Then Return "B_"
             Return "W_"
         End Get
     End Property
 
-    Private BlackTimePlayed As New TimeSpan(0, 0, 0, 0, 0)
-    Private WhiteTimePlayed As New TimeSpan(0, 0, 0, 0, 0)
-    Private BlackPlayer As String
-    Private WhitePlayer As String
+    Private Shared BlackTimePlayed As New TimeSpan(0, 0, 0, 0, 0)
+    Private Shared WhiteTimePlayed As New TimeSpan(0, 0, 0, 0, 0)
+    Private Shared BlackPlayer As String
+    Private Shared WhitePlayer As String
 
     Private Sub Switch()
         Dim Bold As Font = New Font(lblPause.Font, FontStyle.Bold)
         Dim Normal As Font = New Font(lblPause.Font, FontStyle.Regular)
         If GameOver Then Return
-        If PlayingFor = "B_" Then
-            PlayingFor = "W_"
+        If CurrentGo = "B_" Then
+            CurrentGo = "W_"
             pb_black.Hide()
             lblBlackName.ForeColor = Color.Black
             lblBlackName.Font = Normal
@@ -68,7 +76,7 @@ Public Class Form1
             lblWhiteName.ForeColor = Color.Red
             lblWhiteName.Font = Bold
         Else
-            PlayingFor = "B_"
+            CurrentGo = "B_"
             pb_whites.Hide()
             lblWhiteName.ForeColor = Color.Black
             lblWhiteName.Font = Normal
@@ -98,13 +106,46 @@ Public Class Form1
                 Continue While
             End If
             lastMili = DateTime.Now()
-            If PlayingFor = "B_" Then
+            If CurrentGo = "B_" Then
                 BlackTimePlayed = BlackTimePlayed.Add(New TimeSpan(0, 0, 0, 0, 100))
             Else
                 WhiteTimePlayed = WhiteTimePlayed.Add(New TimeSpan(0, 0, 0, 0, 100))
             End If
             UpdateTime()
         End While
+    End Sub
+
+    Public Sub UpdateFromDelta(current As JsonGameDelta, last As JsonGameDelta)
+        If Me.InvokeRequired Then
+            Me.Invoke(Sub() UpdateFromDelta(current, last))
+        Else
+            If last Is Nothing Then
+            Else
+            End If
+            If current.color = PlayerColour.Black Then
+                CurrentGo = "B_"
+            ElseIf current.color = PlayerColour.White Then
+                CurrentGo = "W_"
+            End If
+            If Not String.IsNullOrWhiteSpace(current.white) Then
+                WhitePlayer = current.white
+            End If
+            If Not String.IsNullOrWhiteSpace(current.black) Then
+                BlackPlayer = current.black
+            End If
+            If current.whiteTime.TotalSeconds > 0 Then
+                WhiteTimePlayed = current.whiteTime
+            End If
+            If current.blackTime.TotalSeconds > 0 Then
+                BlackTimePlayed = current.blackTime
+            End If
+            If WhitePlayer = Client.Name Then
+                ' we are white..
+                WeArePlayingFor = "W_"
+            Else
+                WeArePlayingFor = "B_"
+            End If
+        End If
     End Sub
 
     Private Sub UpdateTime()
@@ -146,12 +187,10 @@ Public Class Form1
     End Sub
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        instance = Me
         panel_Hide.Hide()
         panel_Hide.Location = New Point(0, 0)
         panel_Hide.Dock = DockStyle.Fill
-        WhitePlayer = InputBox("Please enter a name for the white player")
-        BlackPlayer = InputBox("Please enter a name for the black player")
-        UpdateNameLabels()
         Dim lastBlack As Boolean = False
         For x As Integer = 1 To 8
             For y As Integer = 1 To 8
@@ -215,6 +254,48 @@ Public Class Form1
         HighlightReset()
         CheckWin()
         pb_black.Hide()
+        Discord = New HandleDiscord()
+        'Discord.Start()
+    End Sub
+    Private doneOnce As Boolean = False
+    Private Sub Form1_FirstActivate(sender As Object, e As EventArgs) Handles MyBase.Activated
+        If doneOnce Then
+            Return
+        End If
+        doneOnce = True
+        panel_Hide.Show() ' Hides game screen
+        btnSaveGame.Hide() ' Remnants of single player
+        btnLoadGame.Hide()
+        lblPause.Text = "Contacting Masterlist to find server..."
+        Dim nThread As New Threading.Thread(AddressOf RunMLThread)
+        nThread.Start()
+    End Sub
+
+    Private Sub RunMLThread()
+        Dim servers = MASTERLIST.GetServers("chess#4008")
+        Dim first = servers.FirstOrDefault()
+        If first Is Nothing Then
+            Form1.instance.Invoke(Sub()
+                                      instance.lblPause.Text = "No servers found." + vbCrLf + "Double click to enter IP address manually"
+                                  End Sub)
+        Else
+            Dim ip As Net.IPAddress
+            If Net.IPAddress.TryParse(first.IPAddress, ip) Then
+                instance.Invoke(Sub()
+                                    instance.lblPause.Text = "Connecting to:" + vbCrLf + first.ServerName + " @ " + first.IPAddress
+                                End Sub)
+                Connection(ip)
+            End If
+        End If
+    End Sub
+
+    Private Sub Connection(ip As Net.IPAddress)
+        Dim yourName = InputBox("Please enter your name")
+        Client = New Connection(Me, ip, yourName)
+        instance.Invoke(Sub()
+                            instance.panel_Hide.Hide()
+                            instance.lblPause.Text = "Game paused" + vbCrLf + "Press P to continue"
+                        End Sub)
     End Sub
 
     Friend Function GetSide(sd As String)
@@ -222,7 +303,7 @@ Public Class Form1
         Return "Black"
     End Function
 
-    Private Sub HighlightReset()
+    Public Sub HighlightReset()
         For Each but As TestButton In TestButtons
             Dim x As Integer = Convert.ToInt32(but.XPos)
             Dim y As Integer = Convert.ToInt32(but.YPos)
@@ -286,7 +367,19 @@ Public Class Form1
         Next
     End Sub
 
-    Private Function TestButtonAtCoord(x As Integer, y As Integer) As TestButton
+    Public Function TestButtonAtString(str As String) As TestButton
+        Dim y = str.Substring(0, 1)
+        Dim x = str.Substring(1)
+        For Each btn As TestButton In TestButtons
+            Dim yL = CoordToPlace(btn.YPos)
+            If x = btn.XPos AndAlso yL = y Then
+                Return btn
+            End If
+        Next
+        Return Nothing
+    End Function
+
+    Public Function TestButtonAtCoord(x As Integer, y As Integer) As TestButton
         For Each btn As TestButton In TestButtons
             Dim _x As Integer = Convert.ToInt32(btn.XPos)
             Dim _y As Integer = Convert.ToInt32(btn.YPos)
@@ -301,7 +394,7 @@ Public Class Form1
         ' Will eventually check for checkmate and what not
         ' (lol look forward to that hell)
         ' We are playing as whites
-        Me.Text = "Test Form | Current player: " & GetSide(PlayingFor.Substring(0, 1)) + " | Blacks: " & RemainingBlacks.ToString() + " | Whites: " + RemainingWhites.ToString()
+        Me.Text = "Test Form | Current player: " & GetSide(CurrentGo.Substring(0, 1)) + " | Blacks: " & RemainingBlacks.ToString() + " | Whites: " + RemainingWhites.ToString()
         If RemainingWhites <= 0 Or RemainingBlacks <= 0 Then
             For Each btn As TestButton In TestButtons
                 btn.Enabled = False
@@ -340,7 +433,7 @@ Public Class Form1
 
     Private RemainingBlacks As Integer = 16
     Private RemainingWhites As Integer = 16
-    Private Sub MovePiece(from As TestButton, _to As TestButton)
+    Public Sub MovePiece(from As TestButton, _to As TestButton)
         If _to.Tag <> "" Then
             Dim fromSide As String = from.Side
             Dim fromPiece As String = from.Piece
@@ -393,7 +486,7 @@ Public Class Form1
                 Dim targetPos As TestButton = TestButtonAtCoord(xL + (i * direction(0)), yL + (i * direction(1)))
                 If targetPos Is Nothing Then Continue For
                 If targetPos.PlaceString = actualPiece.PlaceString Then Continue For
-                If targetPos.Tag.Contains(PlayingFor) = False Then 'if it is not the player's own colour?
+                If targetPos.Tag.Contains(CurrentGo) = False Then 'if it is not the player's own colour?
                     If blocked = False And (actualPiece.Pinned = PinType.None Or actualPiece.Pinned = If(direction(0) = 0, 0.3, 0.1)) Then 'if there isnt a piece on the target square AND movement is allowed on that axis
                         Highlight(xL + (i * direction(0)), yL + (i * direction(1)), Color.Blue, contest, actualPiece)
                         lastValidPiece = targetPos
@@ -449,7 +542,7 @@ Public Class Form1
                 Dim targetPos As TestButton = TestButtonAtCoord(xL + (i * direction(0)), yL + (i * direction(1)))
                 If targetPos Is Nothing Then Continue For
                 If targetPos.PlaceString = actualPiece.PlaceString Then Continue For
-                If targetPos.Tag.Contains(PlayingFor) = False Then
+                If targetPos.Tag.Contains(CurrentGo) = False Then
                     If blocked = False And (actualPiece.Pinned = PinType.None Or actualPiece.Pinned = If(direction(0) - direction(1) = 0, 0.2, 0.4)) Then
                         Highlight(xL + (i * direction(0)), yL + (i * direction(1)), Color.Blue, contest, actualPiece)
                         lastValidPiece = targetPos
@@ -487,7 +580,7 @@ Public Class Form1
             ' They can only move ahead if space is empty.
             ' They can only capture diagonal if it is not empty
             If actualPiece.Pinned = PinType.Horizontal Then Return 'if it is pinned horizontally (somehow) then there is no way the pawn can move
-            Dim toAdd As Integer = If(PlayingFor = "B_", -1, 1) 'towards the opposite side
+            Dim toAdd As Integer = If(CurrentGo = "B_", -1, 1) 'towards the opposite side
             Dim ahead As TestButton = TestButtonAtCoord(xL + toAdd, yL)
             If (ahead IsNot Nothing AndAlso ahead.Tag = "") And (actualPiece.Pinned = PinType.None Or actualPiece.Pinned = PinType.Vertical) Then
                 Highlight(xL + toAdd, yL, Color.Blue, contest, actualPiece)
@@ -568,7 +661,7 @@ Public Class Form1
                 End If
             Next
             If remPlaces = 0 Then
-                If PlayingFor = "W_" Then
+                If CurrentGo = "W_" Then
                     RemainingWhites = 0
                 Else
                     RemainingBlacks = 0
@@ -605,9 +698,9 @@ Public Class Form1
             side = but.Side
             piece = but.Piece
         End If
-        If TestButtonSelected Is Nothing Then
 
-            If but.Side + "_" = PlayingFor Then
+        If TestButtonSelected Is Nothing Then
+            If but.Side + "_" = CurrentGo AndAlso CurrentGo = WeArePlayingFor Then
                 If debug Then
                     For Each btn As TestButton In TestButtons
                         btn.BackColor = Color.Blue
@@ -624,10 +717,19 @@ Public Class Form1
             'Testbuttonselected is the piece selected to move
             'but is the button to move to
             Dim fromSide As String = TestButtonSelected.Side
+            If fromSide + "_" <> WeArePlayingFor Then
+                Return
+            End If
             fromSide = GetSide(fromSide)
             If but.takeable Then
-                lblStatus.Text += fromSide + " " + TestButtonSelected.Piece + " to " + CoordToPlace(yL) + xL.ToString() + vbCrLf
-                MovePiece(TestButtonSelected, but)
+                Dim result = Client.TryMovePiece(CoordToPlace(TestButtonSelected.YPos) + TestButtonSelected.XPos.ToString(), CoordToPlace(yL) + xL.ToString())
+                If result = "" Then
+
+                    lblStatus.Text += fromSide + " " + TestButtonSelected.Piece + " to " + CoordToPlace(yL) + xL.ToString() + vbCrLf
+                    MovePiece(TestButtonSelected, but)
+                Else
+                    MsgBox("Unable to move: " + result)
+                End If
             End If
             TestButtonSelected = Nothing
             HighlightReset()
@@ -661,9 +763,9 @@ Public Class Form1
 
     Private Sub CalculatePlacesInContest()
         If GameOver Then Return
-        Dim resSide As String = PlayingFor
+        Dim resSide As String = CurrentGo
         For Each btn As TestButton In TestButtons
-            PlayingFor = btn.Side + "_"
+            CurrentGo = btn.Side + "_"
             If debug Then
                 btn.Text = ""
                 If btn.BlackThreat Then
@@ -694,7 +796,7 @@ Public Class Form1
                 End If
             End If
         Next
-        PlayingFor = resSide
+        CurrentGo = resSide
         'For i As Integer = TestButtons.Count - 1 To 0 Step -1
         'Dim btn As TestButton = TestButtons(i)
         'If btn.Side = "W" Then Exit For
@@ -708,9 +810,9 @@ Public Class Form1
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles btnResign.Click
-        Dim confirm As Integer = MsgBox("Confirm that you (" & GetSide(PlayingFor.Replace("_", String.Empty)) + ") are going to surrender?", vbOKCancel)
+        Dim confirm As Integer = MsgBox("Confirm that you (" & GetSide(CurrentGo.Replace("_", String.Empty)) + ") are going to surrender?", vbOKCancel)
         If confirm = vbOK Then
-            If PlayingFor = "W_" Then
+            If CurrentGo = "W_" Then
                 RemainingWhites = 0
             Else
                 RemainingBlacks = 0
@@ -743,18 +845,18 @@ Public Class Form1
     Dim beforeDebugChange As String = ""
     Private Sub lblWhiteTimer_DoubleClick(sender As Object, e As EventArgs) Handles lblWhiteTimer.DoubleClick
         If beforeDebugChange <> "" Then
-            PlayingFor = beforeDebugChange
+            CurrentGo = beforeDebugChange
             beforeDebugChange = ""
             btnHelp.Text = "?"
         Else
             If Not debug Then Return
-            beforeDebugChange = PlayingFor
-            If PlayingFor = "W_" Then
-                PlayingFor = "B_"
+            beforeDebugChange = CurrentGo
+            If CurrentGo = "W_" Then
+                CurrentGo = "B_"
             Else
-                PlayingFor = "W_"
+                CurrentGo = "W_"
             End If
-            btnHelp.Text = PlayingFor.Substring(0, 1)
+            btnHelp.Text = CurrentGo.Substring(0, 1)
         End If
     End Sub
 
@@ -780,7 +882,7 @@ Public Class Form1
                 addition.AddDebugPlace(selPiece.PlaceString)
                 addition.ShowDialog()
                 waitingForPromotion = False
-                selPiece.Tag = PlayingFor + addition.Choice
+                selPiece.Tag = CurrentGo + addition.Choice
             End If
             HighlightReset()
         End If
@@ -794,20 +896,20 @@ Public Class Form1
         ' This is called whenever focus to the game form is lost
         If waitingForPromotion Then Return ' Promoting shouldnt pause
         If debug Then Return ' We dont hide in debug (could be running debugger or something)
-        SetPause(True)
+        'SetPause(True)
     End Sub
 
     Private Sub SetPause(bool As Boolean)
         panel_Hide.Visible = bool
         paused = bool
-        lblPause.Text = "GAME PAUSED" & vbCrLf & "Press P to continue" & vbCrLf & $"Current Player: {GetSide(PlayingFor.Substring(0, 1))}"
+        lblPause.Text = "GAME PAUSED" & vbCrLf & "Press P to continue" & vbCrLf & $"Current Player: {GetSide(CurrentGo.Substring(0, 1))}"
     End Sub
 
     Private Sub btnSaveGame_Click(sender As Object, e As EventArgs) Handles btnSaveGame.Click
         Dim save As New GameSave()
         save.BlackTime = BlackTimePlayed
         save.WhiteTime = WhiteTimePlayed
-        save.PlayingFor = PlayingFor
+        save.PlayingFor = CurrentGo
         save.BlackLost = lblBlackLost.Text
         save.WhiteLost = lblWhiteLost.Text
         save.RemainingBlacks = RemainingBlacks
@@ -902,7 +1004,7 @@ Public Class Form1
                 BlackPlayer = save.BlackName
                 WhitePlayer = save.WhiteName
                 lblStatus.Text = save.MoveLog
-                If PlayingFor <> save.PlayingFor Then
+                If CurrentGo <> save.PlayingFor Then
                     Switch()
                 End If
                 Dim i As Integer = 0
@@ -933,17 +1035,26 @@ Public Class Form1
     End Sub
 
     Private Sub UpdateNameLabels()
-        lblBlackName.Text = BlackPlayer
-        lblWhiteName.Text = WhitePlayer
+        Me.Invoke(Sub()
+                      lblBlackName.Text = BlackPlayer
+                      lblWhiteName.Text = WhitePlayer
+                  End Sub)
     End Sub
 
-    Private Sub lblBlackName_DoubleClick(sender As Object, e As EventArgs) Handles lblBlackName.DoubleClick
-        BlackPlayer = InputBox("Please enter a name for Black")
-        UpdateNameLabels()
+    Private Sub discordTimer_Tick(sender As Object, e As EventArgs) Handles discordTimer.Tick
+        If Discord IsNot Nothing Then
+            Discord.Invoke()
+        End If
     End Sub
 
-    Private Sub lblWhiteName_DoubleClick(sender As Object, e As EventArgs) Handles lblWhiteName.DoubleClick
-        WhitePlayer = InputBox("Please enter a name for White")
+    Private Sub Form1_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
+        If Discord IsNot Nothing Then
+            Discord.Dispose()
+        End If
+    End Sub
+
+    Private Sub uiTimer_Tick(sender As Object, e As EventArgs) Handles uiTimer.Tick
         UpdateNameLabels()
+        Me.Text = $"{WhitePlayer} {BlackPlayer} {CurrentGo} {WeArePlayingFor} {Client?.Name}"
     End Sub
 End Class

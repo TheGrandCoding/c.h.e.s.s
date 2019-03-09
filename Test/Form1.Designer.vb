@@ -22,6 +22,7 @@ Partial Class Form1
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
         Me.lblStatus = New System.Windows.Forms.Label()
         Me.lblBlackLost = New System.Windows.Forms.RichTextBox()
         Me.lblWhiteLost = New System.Windows.Forms.RichTextBox()
@@ -33,10 +34,12 @@ Partial Class Form1
         Me.pb_black = New System.Windows.Forms.PictureBox()
         Me.panel_Hide = New System.Windows.Forms.Panel()
         Me.lblPause = New System.Windows.Forms.Label()
-        Me.btnLoadGame = New System.Windows.Forms.Button()
         Me.btnSaveGame = New System.Windows.Forms.Button()
+        Me.btnLoadGame = New System.Windows.Forms.Button()
         Me.lblWhiteName = New System.Windows.Forms.Label()
         Me.lblBlackName = New System.Windows.Forms.Label()
+        Me.discordTimer = New System.Windows.Forms.Timer(Me.components)
+        Me.uiTimer = New System.Windows.Forms.Timer(Me.components)
         CType(Me.pb_whites, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.pb_black, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.panel_Hide.SuspendLayout()
@@ -110,7 +113,7 @@ Partial Class Form1
         '
         Me.pb_whites.Image = Global.Test.My.Resources.Resources.W_Pawn
         Me.pb_whites.Location = New System.Drawing.Point(958, 287)
-        Me.pb_whites.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pb_whites.Margin = New System.Windows.Forms.Padding(4)
         Me.pb_whites.Name = "pb_whites"
         Me.pb_whites.Size = New System.Drawing.Size(72, 66)
         Me.pb_whites.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
@@ -122,7 +125,7 @@ Partial Class Form1
         Me.pb_black.Image = Global.Test.My.Resources.Resources.B_Pawn
         Me.pb_black.InitialImage = Global.Test.My.Resources.Resources.B_Pawn
         Me.pb_black.Location = New System.Drawing.Point(958, 7)
-        Me.pb_black.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
+        Me.pb_black.Margin = New System.Windows.Forms.Padding(4)
         Me.pb_black.Name = "pb_black"
         Me.pb_black.Size = New System.Drawing.Size(72, 66)
         Me.pb_black.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
@@ -151,16 +154,6 @@ Partial Class Form1
         Me.lblPause.Text = "GAME PAUSED" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Press P to continue" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10)
         Me.lblPause.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
-        'btnLoadGame
-        '
-        Me.btnLoadGame.Dock = System.Windows.Forms.DockStyle.Bottom
-        Me.btnLoadGame.Location = New System.Drawing.Point(0, 195)
-        Me.btnLoadGame.Name = "btnLoadGame"
-        Me.btnLoadGame.Size = New System.Drawing.Size(296, 29)
-        Me.btnLoadGame.TabIndex = 1
-        Me.btnLoadGame.Text = "Load"
-        Me.btnLoadGame.UseVisualStyleBackColor = True
-        '
         'btnSaveGame
         '
         Me.btnSaveGame.Dock = System.Windows.Forms.DockStyle.Bottom
@@ -171,13 +164,23 @@ Partial Class Form1
         Me.btnSaveGame.Text = "Save"
         Me.btnSaveGame.UseVisualStyleBackColor = True
         '
+        'btnLoadGame
+        '
+        Me.btnLoadGame.Dock = System.Windows.Forms.DockStyle.Bottom
+        Me.btnLoadGame.Location = New System.Drawing.Point(0, 195)
+        Me.btnLoadGame.Name = "btnLoadGame"
+        Me.btnLoadGame.Size = New System.Drawing.Size(296, 29)
+        Me.btnLoadGame.TabIndex = 1
+        Me.btnLoadGame.Text = "Load"
+        Me.btnLoadGame.UseVisualStyleBackColor = True
+        '
         'lblWhiteName
         '
         Me.lblWhiteName.Location = New System.Drawing.Point(827, 287)
         Me.lblWhiteName.Name = "lblWhiteName"
         Me.lblWhiteName.Size = New System.Drawing.Size(124, 66)
         Me.lblWhiteName.TabIndex = 11
-        Me.lblWhiteName.Text = "Bob"
+        Me.lblWhiteName.Text = "Black"
         Me.lblWhiteName.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'lblBlackName
@@ -186,8 +189,18 @@ Partial Class Form1
         Me.lblBlackName.Name = "lblBlackName"
         Me.lblBlackName.Size = New System.Drawing.Size(124, 66)
         Me.lblBlackName.TabIndex = 12
-        Me.lblBlackName.Text = "Smith"
+        Me.lblBlackName.Text = "White"
         Me.lblBlackName.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+        '
+        'discordTimer
+        '
+        Me.discordTimer.Enabled = True
+        Me.discordTimer.Interval = 250
+        '
+        'uiTimer
+        '
+        Me.uiTimer.Enabled = True
+        Me.uiTimer.Interval = 250
         '
         'Form1
         '
@@ -232,4 +245,6 @@ Partial Class Form1
     Friend WithEvents btnLoadGame As Button
     Friend WithEvents lblWhiteName As Label
     Friend WithEvents lblBlackName As Label
+    Friend WithEvents discordTimer As Timer
+    Friend WithEvents uiTimer As Timer
 End Class

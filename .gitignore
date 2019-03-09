@@ -260,3 +260,9 @@ paket-files/
 __pycache__/
 *.pyc
 *.game
+
+# Custom additions
+log_*.txt
+**/Release/*.*
+!**/Release/Test.exe
+Test/*.txt
