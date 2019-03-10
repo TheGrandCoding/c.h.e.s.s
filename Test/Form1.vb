@@ -120,6 +120,12 @@ Public Class Form1
             Me.Invoke(Sub() UpdateFromDelta(current, last))
         Else
             If last Is Nothing Then
+                ' this is the first game delta
+                ' which means we are JUST in a game
+                instance.Invoke(Sub()
+                                    instance.panel_Hide.Hide()
+                                    instance.lblPause.Text = "Game paused" + vbCrLf + "Press P to continue"
+                                End Sub)
             Else
             End If
             If current.color = PlayerColour.Black Then
@@ -293,8 +299,8 @@ Public Class Form1
         Dim yourName = InputBox("Please enter your name")
         Client = New Connection(Me, ip, yourName)
         instance.Invoke(Sub()
-                            instance.panel_Hide.Hide()
-                            instance.lblPause.Text = "Game paused" + vbCrLf + "Press P to continue"
+                            ' instance.panel_Hide.Hide() ' Dont show yet, as we still need the other player
+                            instance.lblPause.Text = "Waiting for game to start (requires another player)"
                         End Sub)
     End Sub
 
@@ -389,7 +395,7 @@ Public Class Form1
         Next
         Return Nothing
     End Function
-    Private GameOver As Boolean = False
+    Public GameOver As Boolean = False
     Private Sub CheckWin()
         ' Will eventually check for checkmate and what not
         ' (lol look forward to that hell)
@@ -431,8 +437,8 @@ Public Class Form1
         End If
     End Sub
 
-    Private RemainingBlacks As Integer = 16
-    Private RemainingWhites As Integer = 16
+    Public RemainingBlacks As Integer = 16
+    Public RemainingWhites As Integer = 16
     Public Sub MovePiece(from As TestButton, _to As TestButton)
         If _to.Tag <> "" Then
             Dim fromSide As String = from.Side
@@ -812,12 +818,7 @@ Public Class Form1
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles btnResign.Click
         Dim confirm As Integer = MsgBox("Confirm that you (" & GetSide(CurrentGo.Replace("_", String.Empty)) + ") are going to surrender?", vbOKCancel)
         If confirm = vbOK Then
-            If CurrentGo = "W_" Then
-                RemainingWhites = 0
-            Else
-                RemainingBlacks = 0
-            End If
-            CheckWin()
+            Client.Send("RESIGN")
         End If
     End Sub
 
@@ -1056,5 +1057,30 @@ Public Class Form1
     Private Sub uiTimer_Tick(sender As Object, e As EventArgs) Handles uiTimer.Tick
         UpdateNameLabels()
         Me.Text = $"{WhitePlayer} {BlackPlayer} {CurrentGo} {WeArePlayingFor} {Client?.Name}"
+    End Sub
+
+    Private Sub lblPause_DoubleClick(sender As Object, e As EventArgs) Handles lblPause.DoubleClick
+        Dim connLocalhost = False
+        Me.Invoke(Sub()
+                      Me.lblPause.Text = "Attempting connection to localhost..."
+                  End Sub)
+        Try
+            Connection(Net.IPAddress.Loopback)
+            connLocalhost = True
+        Catch ex As Exception
+
+        End Try
+        If Not connLocalhost Then
+            Me.Invoke(Sub()
+                          Me.lblPause.Text = "Local host failed" + vbCrLf + "Enter an IP..."
+                      End Sub)
+            Dim ip = InputBox("Enter the IP address", "IP Input")
+            If Not String.IsNullOrWhiteSpace(ip) Then
+                Dim addr As Net.IPAddress
+                If Net.IPAddress.TryParse(ip, addr) Then
+                    Connection(addr)
+                End If
+            End If
+        End If
     End Sub
 End Class

@@ -102,6 +102,38 @@ Public Class Connection
                 form.Invoke(Sub() form.MovePiece(from, [to]))
                 form.Invoke(Sub() form.HighlightReset())
             End If
+        ElseIf message.StartsWith("LOSE") Then
+            message = message.Substring("LOSE:".Length)
+            Dim reason = "You lost!"
+            If message = "RESIGN" Then
+                reason = "You resigned"
+            End If
+            form.Invoke(Sub()
+                            form.panel_Hide.Show()
+                            form.lblPause.Text = reason
+                            form.GameOver = True
+                            If Form1.WeArePlayingFor = "W_" Then
+                                form.RemainingWhites = 0
+                            Else
+                                form.RemainingBlacks = 0
+                            End If
+                        End Sub)
+        ElseIf message.StartsWith("WIN") Then
+            message = message.Substring("WIN:".Length)
+            Dim reason = "You won"
+            If message = "RESIGN" Then
+                reason = "Your opponent resigned"
+            End If
+            form.Invoke(Sub()
+                            form.panel_Hide.Show()
+                            form.lblPause.Text = reason
+                            form.GameOver = True
+                            If Form1.WeArePlayingFor = "W_" Then
+                                form.RemainingBlacks = 0
+                            Else
+                                form.RemainingWhites = 0
+                            End If
+                        End Sub)
         Else
             RaiseEvent RecievedMessage(Me, message)
         End If
