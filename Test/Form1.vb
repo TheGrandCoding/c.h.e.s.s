@@ -294,9 +294,9 @@ Public Class Form1
             End If
         End If
     End Sub
-
+    Shared rnd As New Random()
     Private Sub Connection(ip As Net.IPAddress)
-        Dim yourName = InputBox("Please enter your name")
+        Dim yourName = InputBox("Please enter your name", "Name", rnd.Next(0, 1000).ToString())
         Client = New Connection(Me, ip, yourName)
         instance.Invoke(Sub()
                             ' instance.panel_Hide.Hide() ' Dont show yet, as we still need the other player
@@ -1068,13 +1068,12 @@ Public Class Form1
             Connection(Net.IPAddress.Loopback)
             connLocalhost = True
         Catch ex As Exception
-
         End Try
         If Not connLocalhost Then
             Me.Invoke(Sub()
                           Me.lblPause.Text = "Local host failed" + vbCrLf + "Enter an IP..."
                       End Sub)
-            Dim ip = InputBox("Enter the IP address", "IP Input")
+            Dim ip = InputBox("Enter the IP address", "IP Input", "10.249.74.120")
             If Not String.IsNullOrWhiteSpace(ip) Then
                 Dim addr As Net.IPAddress
                 If Net.IPAddress.TryParse(ip, addr) Then
