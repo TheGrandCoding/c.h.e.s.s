@@ -11,6 +11,11 @@ Public Class Connection
     Private Const Port = 9993
     Private listenThread As Thread
 
+    ''' <summary>
+    ''' Milisecond timeout for Moving and Promotion operation before they are considered failed
+    ''' </summary>
+    Public TimeOut As Integer = 10 * 1000
+
     Private form As Form1
 
     Private Deltas As New Dictionary(Of Integer, JsonGameDelta)
@@ -67,6 +72,10 @@ Public Class Connection
         End If
     End Sub
 
+    Private Sub Display(message As String)
+        form.Invoke(Sub() form.lblStatus.Text += message + vbCrLf)
+    End Sub
+
     Private Sub HandleMessage(sender As Object, message As String)
         If message.StartsWith("GAME:") Then
             Dim delta = JsonConvert.DeserializeObject(Of JsonGameDelta)(message.Replace("GAME:", ""))
@@ -90,6 +99,18 @@ Public Class Connection
                     moving.ErrorMessage = message
                     moving.moveConfirmed.Set()
                 End If
+            ElseIf message.StartsWith("PROMOTE/") Then
+                message = message.Substring("PROMOTE/".Length)
+                Dim isSuccess As Boolean = False
+                If message.StartsWith("SUC:") Then
+                    isSuccess = True
+                End If
+                message = message.Substring("SUC:".Length)
+                If promoting IsNot Nothing Then
+                    promoting.IsSuccess = isSuccess
+                    promoting.ErrorMessage = message
+                    promoting.moveConfirmed.Set()
+                End If
             End If
         ElseIf message.StartsWith("OTH/") Then
             ' message due to the other player's actions
@@ -101,6 +122,15 @@ Public Class Connection
                 Dim [to] = Form1.TestButtonAtString(split(1))
                 form.Invoke(Sub() form.MovePiece(from, [to]))
                 form.Invoke(Sub() form.HighlightReset())
+                Display($"Moved {from.PlaceString} to {[to].PlaceString}")
+            ElseIf message.StartsWith("PROMOTE:") Then
+                message = message.Substring("PROMOTE:".Length)
+                Dim split() = message.Split(":")
+                Dim from = Form1.TestButtonAtString(split(0))
+                Dim type = CType(Integer.Parse(split(1)), PieceType)
+                from.Piece = type.ToString()
+                form.Invoke(Sub() form.HighlightReset())
+                Display($"Promoted {from.PlaceString} to {type}")
             End If
         ElseIf message.StartsWith("LOSE") Then
             message = message.Substring("LOSE:".Length)
@@ -160,7 +190,6 @@ Public Class Connection
     Private Class MovePiece
         Public From As String
         Public [To] As String
-        Public DelayTask As Task
         Public moveConfirmed As New ManualResetEvent(False)
         Public IsSuccess As Boolean = False
         Public ErrorMessage As String = "Operation timed out"
@@ -172,7 +201,7 @@ Public Class Connection
             moving.From = from
             moving.To = [to]
             Send("MOVE:" + from + ":" + [to])
-            moving.moveConfirmed.WaitOne(1500000) ' waits until confirmed, or a timeout occurs
+            moving.moveConfirmed.WaitOne(TimeOut) ' waits until confirmed, or a timeout occurs
             Dim suc = moving.IsSuccess
             Dim err = moving.ErrorMessage
             moving = Nothing ' reset
@@ -182,10 +211,46 @@ Public Class Connection
                 Return err
             End If
         Else
-            Return "Move already in progress: " + from + " -> " + [to]
+            Return "Move already in progress: " + moving.From + " -> " + moving.[To]
         End If
     End Function
 #End Region
+
+#Region "Promoting Piecees"
+    Private promoting As PromotePiece
+
+    Private Class PromotePiece
+        Public From As String
+        Public Piece As PieceType
+        Public moveConfirmed As New ManualResetEvent(False)
+        Public IsSuccess = False
+        Public ErrorMessage = "Operation timed out"
+    End Class
+
+    Public Function TryPromotePiece(from As String, type As PieceType) As String
+        If promoting Is Nothing Then
+            promoting = New PromotePiece()
+            promoting.From = from
+            promoting.Piece = type
+            Send($"PROMOTE:{from};{CType(type, Integer)}")
+            promoting.moveConfirmed.WaitOne(TimeOut)
+            Dim suc = promoting.IsSuccess
+            Dim err = promoting.ErrorMessage
+            promoting = Nothing ' reset
+            If suc Then
+                Return ""
+            Else
+                Return err
+            End If
+        Else
+            Return "Promotion already in progress: " + promoting.From + " -> " + promoting.Piece.ToString()
+        End If
+    End Function
+
+#End Region
+
+
+
 End Class
 Public Enum PlayerColour
     NotSet

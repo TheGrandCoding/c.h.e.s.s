@@ -747,9 +747,15 @@ Public Class Form1
                     prom.SetPlace(but.PlaceString)
                     prom.ShowDialog()
                     waitingForPromotion = False
-                    but.Piece = prom.Choice
-                    lblStatus.Text += but.PlaceString + " promoted to " + but.Side + " " + but.Piece
-                    HighlightReset()
+                    Dim type = prom.Choice
+                    Dim attempt = Client.TryPromotePiece(but.PlaceString, type)
+                    If String.IsNullOrWhiteSpace(attempt) Then
+                        but.Piece = type.ToString()
+                        lblStatus.Text += but.PlaceString + " promoted to " + but.Side + " " + but.Piece
+                        HighlightReset()
+                    Else
+                        MsgBox("Unable to promote: " + attempt, MsgBoxStyle.Critical)
+                    End If
                 End If
             End If
         End If

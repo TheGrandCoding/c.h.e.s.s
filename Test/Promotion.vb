@@ -1,8 +1,9 @@
 ﻿Public Class Promotion
-    Public Choice As String = ""
+    Public Choice As PieceType = PieceType.NoneSelected
     Private Sub rb_Rook_CheckedChanged(sender As Object, e As EventArgs) Handles rb_Rook.CheckedChanged, rb_Bishop.CheckedChanged, rb_Queen.CheckedChanged, rb_Knight.CheckedChanged, rb_pawn.CheckedChanged
         Dim rb As RadioButton = CType(sender, RadioButton)
-        Choice = rb.Text
+        If System.Enum.TryParse(Of PieceType)(rb.Text, Choice) Then
+        End If
     End Sub
 
     Public Sub SetPlace(xy As String)
@@ -18,7 +19,7 @@
     End Sub
 
     Private Sub Promotion_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
-        If Choice = "" Then
+        If Choice = PieceType.NoneSelected Then
             e.Cancel = True
             MsgBox("You must select a piece to promote to!")
         End If
