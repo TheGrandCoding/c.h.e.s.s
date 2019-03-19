@@ -13,6 +13,8 @@ Public Class Form1
     Public Shared InGame As Boolean = False
     Public Shared Client As Connection
 
+    Dim tempSelfName As String = Nothing
+
     Private WithEvents kbHook As New KeyboardHook()
 
     Dim pPressed As Boolean = False
@@ -296,8 +298,8 @@ Public Class Form1
     End Sub
     Shared rnd As New Random()
     Private Sub Connection(ip As Net.IPAddress)
-        Dim yourName = InputBox("Please enter your name", "Name", rnd.Next(0, 1000).ToString())
-        Client = New Connection(Me, ip, yourName)
+        tempSelfName = If(tempSelfName, InputBox("Please enter your name", "Name", rnd.Next(0, 1000).ToString()))
+        Client = New Connection(Me, ip, tempSelfName)
         instance.Invoke(Sub()
                             ' instance.panel_Hide.Hide() ' Dont show yet, as we still need the other player
                             instance.lblPause.Text = "Waiting for game to start (requires another player)"
