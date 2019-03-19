@@ -188,6 +188,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="readme.txt" />
+    <None Include="Resources\B_Barrier.png" />
+    <None Include="Resources\W_Barrier.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>
