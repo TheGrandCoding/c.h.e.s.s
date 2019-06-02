@@ -33,6 +33,10 @@ Public Class Connection
     ''' </summary>
     Private Event internalMessage As EventHandler(Of String)
 
+    Public Sub Log(value As String)
+        Form1.logger.Log(value)
+    End Sub
+
 
     Public Sub Send(message As String)
         Try
@@ -62,7 +66,7 @@ Public Class Connection
         Dim tTask = Task.Delay(30000)
         Task.WaitAny(cTask, tTask) ' waits for timeout or connnection
         If Client.Connected Then
-            Send(_name)
+            Send(_name + ":" + System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString())
             listenThread = New Thread(AddressOf Listener)
             listenThread.Start()
             Name = _name
@@ -70,6 +74,7 @@ Public Class Connection
         Else
             Throw New Exception("Failed to connect to " + conn.ToString() + ":" + Port.ToString())
         End If
+        Form1.logger = New Logger(Me)
     End Sub
 
     Private Sub Display(message As String)
@@ -77,7 +82,10 @@ Public Class Connection
     End Sub
 
     Private Sub HandleMessage(sender As Object, message As String)
-        If message.StartsWith("GAME:") Then
+        If message.StartsWith("NAME:") Then
+            Dim name = message.Replace("NAME:", "")
+            Me.Name = name
+        ElseIf message.StartsWith("GAME:") Then
             Dim delta = JsonConvert.DeserializeObject(Of JsonGameDelta)(message.Replace("GAME:", ""))
             Deltas.Add(delta.ID, delta)
             Dim lastDelta As JsonGameDelta
@@ -180,6 +188,7 @@ Public Class Connection
                 If String.IsNullOrWhiteSpace(message) Then
                     Continue For
                 End If
+                Log("Recieved: " + message)
                 RaiseEvent internalMessage(Me, message.Substring(0, message.LastIndexOf("`")))
             Next
         End While

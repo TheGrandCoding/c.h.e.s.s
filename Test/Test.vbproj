@@ -87,6 +87,7 @@
     <Compile Include="JsonStuffs\ChessPosition.vb" />
     <Compile Include="JsonStuffs\JsonGameDelta.vb" />
     <Compile Include="HandleDiscord.vb" />
+    <Compile Include="Logger.vb" />
     <Compile Include="TestButton.Designer.vb">
       <DependentUpon>TestButton.vb</DependentUpon>
     </Compile>

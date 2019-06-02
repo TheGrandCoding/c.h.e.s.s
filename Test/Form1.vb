@@ -1,12 +1,23 @@
 ﻿Imports System.ComponentModel
 'Imports Newtonsoft.Json
 Imports System.IO
+Imports System.Reflection
 Imports MASTERLIST = MasterlistDLL.MasterListClient
-
+<Assembly: AssemblyVersion("0.1.0")>
+' Assembly version - Major.Minor.Build
+' Server will refuse connection if Major OR Minor are different to server's
+' Build numbers will not be considered by the server
 Public Class Form1
+    Public Const DISABLE_MASTERLIST = True
     Public Shared TestButtons As New List(Of TestButton)
     Private CoordToPlace As New Dictionary(Of Integer, String) From {{1, "A"}, {2, "B"}, {3, "C"}, {4, "D"}, {5, "E"}, {6, "F"}, {7, "G"}, {8, "H"}}
     Public Shared instance As Form1
+
+    Public Shared logger As New Logger()
+
+    Public Sub Log(value As String)
+        logger.Log(value)
+    End Sub
 
     Private Shared Discord As HandleDiscord
 
@@ -19,6 +30,10 @@ Public Class Form1
 
     Dim pPressed As Boolean = False
     Dim ctrlPressed As Boolean = False
+
+    Public VER_MAJOR = Assembly.GetEntryAssembly().GetName().Version.Major
+    Public VER_MINOR = Assembly.GetEntryAssembly().GetName().Version.Minor
+    Public VER_BUILD = Assembly.GetEntryAssembly().GetName().Version.Build
 
     Private Sub kbHook_KeyDown(ByVal key As Keys) Handles kbHook.KeyDown
         If key <> Keys.P AndAlso key.ToString().Contains("Control") = False Then
@@ -274,9 +289,13 @@ Public Class Form1
         panel_Hide.Show() ' Hides game screen
         btnSaveGame.Hide() ' Remnants of single player
         btnLoadGame.Hide()
-        lblPause.Text = "Contacting Masterlist to find server..."
-        Dim nThread As New Threading.Thread(AddressOf RunMLThread)
-        nThread.Start()
+        If DISABLE_MASTERLIST Then
+            lblPause.Text = "Double click to enter IP manually"
+        Else
+            lblPause.Text = "Contacting Masterlist to find server..."
+            Dim nThread As New Threading.Thread(AddressOf RunMLThread)
+            nThread.Start()
+        End If
     End Sub
 
     Private Sub RunMLThread()
@@ -298,7 +317,7 @@ Public Class Form1
     End Sub
     Shared rnd As New Random()
     Private Sub Connection(ip As Net.IPAddress)
-        tempSelfName = If(tempSelfName, InputBox("Please enter your name", "Name", rnd.Next(0, 1000).ToString()))
+        tempSelfName = If(tempSelfName, InputBox("Please enter your name", "Name", Environment.UserName))
         Client = New Connection(Me, ip, tempSelfName)
         instance.Invoke(Sub()
                             ' instance.panel_Hide.Hide() ' Dont show yet, as we still need the other player
