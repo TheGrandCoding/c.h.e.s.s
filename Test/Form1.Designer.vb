@@ -48,67 +48,64 @@ Partial Class Form1
         '
         'lblStatus
         '
-        Me.lblStatus.Location = New System.Drawing.Point(455, 5)
-        Me.lblStatus.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lblStatus.Location = New System.Drawing.Point(607, 6)
         Me.lblStatus.Name = "lblStatus"
-        Me.lblStatus.Size = New System.Drawing.Size(160, 375)
+        Me.lblStatus.Size = New System.Drawing.Size(213, 462)
         Me.lblStatus.TabIndex = 1
         Me.lblStatus.Text = "Log:" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10)
         '
         'lblBlackLost
         '
-        Me.lblBlackLost.Location = New System.Drawing.Point(620, 64)
-        Me.lblBlackLost.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.lblBlackLost.Location = New System.Drawing.Point(827, 79)
+        Me.lblBlackLost.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.lblBlackLost.Name = "lblBlackLost"
         Me.lblBlackLost.ReadOnly = True
-        Me.lblBlackLost.Size = New System.Drawing.Size(155, 164)
+        Me.lblBlackLost.Size = New System.Drawing.Size(205, 201)
         Me.lblBlackLost.TabIndex = 2
         Me.lblBlackLost.Text = "Black Lost:" & Global.Microsoft.VisualBasic.ChrW(10)
         '
         'lblWhiteLost
         '
-        Me.lblWhiteLost.Location = New System.Drawing.Point(620, 292)
-        Me.lblWhiteLost.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.lblWhiteLost.Location = New System.Drawing.Point(827, 359)
+        Me.lblWhiteLost.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.lblWhiteLost.Name = "lblWhiteLost"
         Me.lblWhiteLost.ReadOnly = True
-        Me.lblWhiteLost.Size = New System.Drawing.Size(155, 163)
+        Me.lblWhiteLost.Size = New System.Drawing.Size(205, 200)
         Me.lblWhiteLost.TabIndex = 3
         Me.lblWhiteLost.Text = "White lost:" & Global.Microsoft.VisualBasic.ChrW(10)
         '
         'lblWhiteTimer
         '
-        Me.lblWhiteTimer.Location = New System.Drawing.Point(505, 428)
-        Me.lblWhiteTimer.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lblWhiteTimer.Location = New System.Drawing.Point(673, 527)
         Me.lblWhiteTimer.Name = "lblWhiteTimer"
-        Me.lblWhiteTimer.Size = New System.Drawing.Size(110, 19)
+        Me.lblWhiteTimer.Size = New System.Drawing.Size(147, 23)
         Me.lblWhiteTimer.TabIndex = 4
         Me.lblWhiteTimer.Text = "White Time:"
         '
         'lblBlackTimer
         '
-        Me.lblBlackTimer.Location = New System.Drawing.Point(505, 402)
-        Me.lblBlackTimer.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lblBlackTimer.Location = New System.Drawing.Point(673, 495)
         Me.lblBlackTimer.Name = "lblBlackTimer"
-        Me.lblBlackTimer.Size = New System.Drawing.Size(110, 19)
+        Me.lblBlackTimer.Size = New System.Drawing.Size(147, 23)
         Me.lblBlackTimer.TabIndex = 5
         Me.lblBlackTimer.Text = "Black Time:"
         '
         'btnHelp
         '
-        Me.btnHelp.Location = New System.Drawing.Point(9, 10)
-        Me.btnHelp.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.btnHelp.Location = New System.Drawing.Point(12, 12)
+        Me.btnHelp.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.btnHelp.Name = "btnHelp"
-        Me.btnHelp.Size = New System.Drawing.Size(30, 32)
+        Me.btnHelp.Size = New System.Drawing.Size(40, 39)
         Me.btnHelp.TabIndex = 6
         Me.btnHelp.Text = "?"
         Me.btnHelp.UseVisualStyleBackColor = True
         '
         'btnResign
         '
-        Me.btnResign.Location = New System.Drawing.Point(451, 402)
-        Me.btnResign.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.btnResign.Location = New System.Drawing.Point(601, 495)
+        Me.btnResign.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.btnResign.Name = "btnResign"
-        Me.btnResign.Size = New System.Drawing.Size(50, 45)
+        Me.btnResign.Size = New System.Drawing.Size(67, 55)
         Me.btnResign.TabIndex = 7
         Me.btnResign.Text = "Resign"
         Me.btnResign.UseVisualStyleBackColor = True
@@ -116,9 +113,10 @@ Partial Class Form1
         'pb_whites
         '
         Me.pb_whites.Image = Global.Test.My.Resources.Resources.W_Pawn
-        Me.pb_whites.Location = New System.Drawing.Point(718, 233)
+        Me.pb_whites.Location = New System.Drawing.Point(957, 287)
+        Me.pb_whites.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.pb_whites.Name = "pb_whites"
-        Me.pb_whites.Size = New System.Drawing.Size(54, 54)
+        Me.pb_whites.Size = New System.Drawing.Size(72, 66)
         Me.pb_whites.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
         Me.pb_whites.TabIndex = 8
         Me.pb_whites.TabStop = False
@@ -127,9 +125,10 @@ Partial Class Form1
         '
         Me.pb_black.Image = Global.Test.My.Resources.Resources.B_Pawn
         Me.pb_black.InitialImage = Global.Test.My.Resources.Resources.B_Pawn
-        Me.pb_black.Location = New System.Drawing.Point(718, 6)
+        Me.pb_black.Location = New System.Drawing.Point(957, 7)
+        Me.pb_black.Margin = New System.Windows.Forms.Padding(4, 4, 4, 4)
         Me.pb_black.Name = "pb_black"
-        Me.pb_black.Size = New System.Drawing.Size(54, 54)
+        Me.pb_black.Size = New System.Drawing.Size(72, 66)
         Me.pb_black.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
         Me.pb_black.TabIndex = 9
         Me.pb_black.TabStop = False
@@ -139,10 +138,10 @@ Partial Class Form1
         Me.panel_Hide.Controls.Add(Me.lblPause)
         Me.panel_Hide.Controls.Add(Me.btnSaveGame)
         Me.panel_Hide.Controls.Add(Me.btnLoadGame)
-        Me.panel_Hide.Location = New System.Drawing.Point(9, 46)
-        Me.panel_Hide.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.panel_Hide.Location = New System.Drawing.Point(12, 57)
+        Me.panel_Hide.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.panel_Hide.Name = "panel_Hide"
-        Me.panel_Hide.Size = New System.Drawing.Size(222, 182)
+        Me.panel_Hide.Size = New System.Drawing.Size(296, 224)
         Me.panel_Hide.TabIndex = 10
         '
         'lblPause
@@ -151,9 +150,8 @@ Partial Class Form1
         Me.lblPause.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.lblPause.ForeColor = System.Drawing.Color.Red
         Me.lblPause.Location = New System.Drawing.Point(0, 0)
-        Me.lblPause.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.lblPause.Name = "lblPause"
-        Me.lblPause.Size = New System.Drawing.Size(222, 134)
+        Me.lblPause.Size = New System.Drawing.Size(296, 164)
         Me.lblPause.TabIndex = 0
         Me.lblPause.Text = "GAME PAUSED" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10) & "Press P to continue" & Global.Microsoft.VisualBasic.ChrW(13) & Global.Microsoft.VisualBasic.ChrW(10)
         Me.lblPause.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
@@ -161,10 +159,10 @@ Partial Class Form1
         'btnSaveGame
         '
         Me.btnSaveGame.Dock = System.Windows.Forms.DockStyle.Bottom
-        Me.btnSaveGame.Location = New System.Drawing.Point(0, 134)
-        Me.btnSaveGame.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.btnSaveGame.Location = New System.Drawing.Point(0, 164)
+        Me.btnSaveGame.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.btnSaveGame.Name = "btnSaveGame"
-        Me.btnSaveGame.Size = New System.Drawing.Size(222, 24)
+        Me.btnSaveGame.Size = New System.Drawing.Size(296, 30)
         Me.btnSaveGame.TabIndex = 2
         Me.btnSaveGame.Text = "Save"
         Me.btnSaveGame.UseVisualStyleBackColor = True
@@ -172,30 +170,28 @@ Partial Class Form1
         'btnLoadGame
         '
         Me.btnLoadGame.Dock = System.Windows.Forms.DockStyle.Bottom
-        Me.btnLoadGame.Location = New System.Drawing.Point(0, 158)
-        Me.btnLoadGame.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.btnLoadGame.Location = New System.Drawing.Point(0, 194)
+        Me.btnLoadGame.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.btnLoadGame.Name = "btnLoadGame"
-        Me.btnLoadGame.Size = New System.Drawing.Size(222, 24)
+        Me.btnLoadGame.Size = New System.Drawing.Size(296, 30)
         Me.btnLoadGame.TabIndex = 1
         Me.btnLoadGame.Text = "Load"
         Me.btnLoadGame.UseVisualStyleBackColor = True
         '
         'lblWhiteName
         '
-        Me.lblWhiteName.Location = New System.Drawing.Point(620, 233)
-        Me.lblWhiteName.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lblWhiteName.Location = New System.Drawing.Point(827, 287)
         Me.lblWhiteName.Name = "lblWhiteName"
-        Me.lblWhiteName.Size = New System.Drawing.Size(93, 54)
+        Me.lblWhiteName.Size = New System.Drawing.Size(124, 66)
         Me.lblWhiteName.TabIndex = 11
         Me.lblWhiteName.Text = "Black"
         Me.lblWhiteName.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
         '
         'lblBlackName
         '
-        Me.lblBlackName.Location = New System.Drawing.Point(620, 6)
-        Me.lblBlackName.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.lblBlackName.Location = New System.Drawing.Point(827, 7)
         Me.lblBlackName.Name = "lblBlackName"
-        Me.lblBlackName.Size = New System.Drawing.Size(93, 54)
+        Me.lblBlackName.Size = New System.Drawing.Size(124, 66)
         Me.lblBlackName.TabIndex = 12
         Me.lblBlackName.Text = "White"
         Me.lblBlackName.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
@@ -212,19 +208,19 @@ Partial Class Form1
         '
         'btnUndo
         '
-        Me.btnUndo.Location = New System.Drawing.Point(451, 373)
-        Me.btnUndo.Margin = New System.Windows.Forms.Padding(2)
+        Me.btnUndo.Location = New System.Drawing.Point(601, 459)
+        Me.btnUndo.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.btnUndo.Name = "btnUndo"
-        Me.btnUndo.Size = New System.Drawing.Size(164, 25)
+        Me.btnUndo.Size = New System.Drawing.Size(219, 31)
         Me.btnUndo.TabIndex = 13
         Me.btnUndo.Text = "Undo last action"
         Me.btnUndo.UseVisualStyleBackColor = True
         '
         'Form1
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(782, 466)
+        Me.ClientSize = New System.Drawing.Size(1043, 574)
         Me.Controls.Add(Me.btnUndo)
         Me.Controls.Add(Me.panel_Hide)
         Me.Controls.Add(Me.pb_black)
@@ -239,7 +235,7 @@ Partial Class Form1
         Me.Controls.Add(Me.lblBlackName)
         Me.Controls.Add(Me.lblWhiteName)
         Me.KeyPreview = True
-        Me.Margin = New System.Windows.Forms.Padding(2, 2, 2, 2)
+        Me.Margin = New System.Windows.Forms.Padding(3, 2, 3, 2)
         Me.Name = "Form1"
         Me.Text = "Test Form"
         CType(Me.pb_whites, System.ComponentModel.ISupportInitialize).EndInit()

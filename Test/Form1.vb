@@ -3,7 +3,7 @@
 Imports System.IO
 Imports System.Reflection
 Imports MASTERLIST = MasterlistDLL.MasterListClient
-<Assembly: AssemblyVersion("0.1.0")>
+<Assembly: AssemblyVersion("0.2.0")>
 ' Assembly version - Major.Minor.Build
 ' Server will refuse connection if Major OR Minor are different to server's
 ' Build numbers will not be considered by the server
@@ -211,6 +211,7 @@ Public Class Form1
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         instance = Me
+        btnUndo.Enabled = False
         panel_Hide.Hide()
         panel_Hide.Location = New Point(0, 0)
         panel_Hide.Dock = DockStyle.Fill
