@@ -172,7 +172,17 @@ Public Class Connection
                                 form.RemainingWhites = 0
                             End If
                         End Sub)
+        ElseIf message.StartsWith("LOAD:") Then
+            message = message.Substring("LOAD:".Length)
+            Dim jsonObj = Newtonsoft.Json.Linq.JObject.Parse(message)
+            form.Invoke(Sub()
+                            ' We will only update the board for now,
+                            ' the server's next BroadcastDelta should update the rest
+
+                            Dim board = jsonObj("board").ToObject(Of Dictionary(Of String, String()))()
+                        End Sub)
         Else
+            ' nothing actually listens to this it seems?
             RaiseEvent RecievedMessage(Me, message)
         End If
     End Sub

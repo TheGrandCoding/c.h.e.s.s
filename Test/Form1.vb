@@ -211,6 +211,7 @@ Public Class Form1
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         instance = Me
+        Log("Initialising with username: " + Environment.UserDomainName)
         btnUndo.Enabled = False
         panel_Hide.Hide()
         panel_Hide.Location = New Point(0, 0)
